@@ -32,7 +32,8 @@
 #           echo "🚀 Deploying to production server..."
 
 
-name: Vercel Preview Deployment
+# name: Vercel Preview Deployment
+name: Node.js CI/CD Demo
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -55,3 +56,11 @@ jobs:
       - name: Deploy Project to Vercel
         id: deploy
         run: echo "::set-output name=url::$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})"
+      - name: Create GitHub Deployment
+        uses: bobheadxi/deployments@v0.7.0
+        with:
+          step: end
+          token: ${{ secrets.GITHUB_TOKEN }}
+          url: ${{ steps.deploy.outputs.url }}
+          status: success
+          env: preview
