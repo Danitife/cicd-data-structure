@@ -6,6 +6,9 @@ app.get("/", (req, res) => {
     res.send("My name is Daniel");
 })
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-})
+// app.listen(port, () => {
+//     console.log(`Server is running on http://localhost:${port}`);
+// })
+
+module.exports = app;
+
