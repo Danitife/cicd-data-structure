@@ -2,7 +2,8 @@
   "type": "commonjs",
   "name": "my-express-app",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "dotenv": "^16.4.5"
   },
   "scripts": {
     "start": "node server.js",
