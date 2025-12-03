@@ -5,9 +5,11 @@ deployment:
   
    # 2. Install/Update Node.js Dependencies
    # This command must be run in the directory containing package.json
-   - /usr/bin/npm install --prefix /home/dclujrdb/server2
+   # Using $DEPLOYPATH variable provided by cPanel for portability
+   - /usr/bin/npm install --prefix $DEPLOYPATH
   
    # 3. Restart the Node.js Application
    # Passenger needs to be restarted to pick up the new code and dependencies.
    # We use the 'passenger-config restart-app' command pointing to the app's root directory.
-   - /usr/bin/passenger-config restart-app --ignore-app-not-running /home/dclujrdb/server2
+   # Using $DEPLOYPATH variable provided by cPanel for portability
+   - /usr/bin/passenger-config restart-app --ignore-app-not-running $DEPLOYPATH
