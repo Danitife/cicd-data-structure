@@ -46,15 +46,15 @@ This project uses cPanel's Git Version Control feature for automated deployments
 
 ```yaml
 deployment:
- tasks:
-   # 1. Set up Node.js 24 environment
-   - export PATH=/opt/cpanel/ea-nodejs24/bin:$PATH
-   
-   # 2. Install/update npm dependencies
-   - /usr/bin/npm install --prefix $DEPLOYPATH
-   
-   # 3. Restart the application with new code
-   - /usr/bin/passenger-config restart-app --ignore-app-not-running $DEPLOYPATH
+  tasks:
+    # 1. Set up Node.js 24 environment
+    - export PATH=/opt/cpanel/ea-nodejs24/bin:$PATH
+    
+    # 2. Install/update npm dependencies
+    - /usr/bin/npm install --prefix $DEPLOYPATH
+    
+    # 3. Restart the application with new code
+    - /usr/bin/passenger-config restart-app --ignore-app-not-running $DEPLOYPATH
 ```
 
 ### Key Points

@@ -45,14 +45,18 @@ This file controls automated deployment when code is pushed to the repository an
 
 **Before**:
 ```yaml
-- /usr/bin/npm install --prefix /home/dclujrdb/server2
-- /usr/bin/passenger-config restart-app --ignore-app-not-running /home/dclujrdb/server2
+deployment:
+  tasks:
+    - /usr/bin/npm install --prefix /home/dclujrdb/server2
+    - /usr/bin/passenger-config restart-app --ignore-app-not-running /home/dclujrdb/server2
 ```
 
 **After**:
 ```yaml
-- /usr/bin/npm install --prefix $DEPLOYPATH
-- /usr/bin/passenger-config restart-app --ignore-app-not-running $DEPLOYPATH
+deployment:
+  tasks:
+    - /usr/bin/npm install --prefix $DEPLOYPATH
+    - /usr/bin/passenger-config restart-app --ignore-app-not-running $DEPLOYPATH
 ```
 
 **Benefits**:

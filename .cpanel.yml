@@ -1,15 +1,15 @@
 deployment:
- tasks:
-   # 1. Prepare Environment (e.g., set up paths, although Passenger handles most of this)
-   - export PATH=/opt/cpanel/ea-nodejs24/bin:$PATH
-  
-   # 2. Install/Update Node.js Dependencies
-   # This command must be run in the directory containing package.json
-   # Using $DEPLOYPATH variable provided by cPanel for portability
-   - /usr/bin/npm install --prefix $DEPLOYPATH
-  
-   # 3. Restart the Node.js Application
-   # Passenger needs to be restarted to pick up the new code and dependencies.
-   # We use the 'passenger-config restart-app' command pointing to the app's root directory.
-   # Using $DEPLOYPATH variable provided by cPanel for portability
-   - /usr/bin/passenger-config restart-app --ignore-app-not-running $DEPLOYPATH
+  tasks:
+    # 1. Prepare Environment (e.g., set up paths, although Passenger handles most of this)
+    - export PATH=/opt/cpanel/ea-nodejs24/bin:$PATH
+    
+    # 2. Install/Update Node.js Dependencies
+    # This command must be run in the directory containing package.json
+    # Using $DEPLOYPATH variable provided by cPanel for portability
+    - /usr/bin/npm install --prefix $DEPLOYPATH
+    
+    # 3. Restart the Node.js Application
+    # Passenger needs to be restarted to pick up the new code and dependencies.
+    # We use the 'passenger-config restart-app' command pointing to the app's root directory.
+    # Using $DEPLOYPATH variable provided by cPanel for portability
+    - /usr/bin/passenger-config restart-app --ignore-app-not-running $DEPLOYPATH
