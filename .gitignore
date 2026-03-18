@@ -1,6 +1,9 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 /node_modules
 =======
+=======
+>>>>>>> f9156eea1124940fa29a3dce1377f627b7eff9a5
 # Logs
 logs
 *.log
@@ -141,5 +144,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vercel
+<<<<<<< HEAD
+.github
+>>>>>>> f9156eea1124940fa29a3dce1377f627b7eff9a5
+=======
 .github
 >>>>>>> f9156eea1124940fa29a3dce1377f627b7eff9a5
