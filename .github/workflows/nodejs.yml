@@ -2,9 +2,9 @@ name: Node.js CI/CD Demo
 
 on:
   push:
-    branches: [ main ]
+    branches: [ july-2026 ]
   pull_request:
-    branches: [ main ]
+    branches: [ july-2026 ]
 
 jobs:
   build-test-deploy:
