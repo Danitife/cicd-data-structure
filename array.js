@@ -50,3 +50,21 @@ function factorial(num){
     if(num <= 1) return 1; // base case
     return num * factorial(num - 1);
 }
+
+function isPalindrome(str){
+    if(str.length <= 1) return true; // base case
+    if(str[0] !== str[str.length - 1]) return `${str} is not a palindrome`;
+    isPalindrome(str.slice(1, -1));
+    return `${str} is a palindrome`;
+}
+
+
+console.log(isPalindrome("madan"));
+
+hideDigits(123456789); // ******789
+
+checkExtention("file.txt"); // Must be a pdf file
+checkExtention("dan.jpeg"); // Must be a pdf file
+checkExtention("info.pdf"); // Valid file
+
+clockFormatter(20260928); // 2026-09-28
