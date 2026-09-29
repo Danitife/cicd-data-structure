@@ -10,6 +10,25 @@ class CustomArray {
         this.length++;
         return this.length;
     }
+    myPop(){
+        if(this.length === 0) return undefined;
+        const lastItem = this.length - 1;
+        const deletedItem = this.items[lastItem];
+        delete this.items[lastItem];
+        this.length--;
+        return deletedItem;
+    }
+    myShift(){
+        if(this.length === 0) return undefined;
+        const firstItem = this.items[0];
+        for(let i=0; i < this.length -1; i++){
+            this.items[i] = this.items[i + 1];
+        }
+        delete this.items[this.length - 1];
+        this.length--;
+        return firstItem;
+    }
+    unshift(el){} // Add element to the beginning of the array
 }
 
 
@@ -17,19 +36,33 @@ let fineCars = new CustomArray();
 
 fineCars.myPush("Toyota");
 fineCars.myPush("Honda");
+fineCars.myPush("Lexus");
+fineCars.myPush("Nissan");
 
+fineCars.myPop();
 console.log(fineCars);
 
 
+// write a function that creates a right angle triangle using astericks(*)
+// rightAngleTriangle(10);
 
-// let favorites = new Array("Pounded Yam", "Spagetti", "Rice", "Beans", "Fufu");
+// *
+// **
+// ***
+// ****
+// *****
+// ******
+// *******
+// ********
+// *********
+// **********
 
-// favorites.push("Eba"); // Add an element to the end of the array
+// write a function that creates a pyramid using astericks(*)
 
+pyramid(5);
 
-// let names = ["Fedrick", "Quadri", "Ayo", "Abubakri", "Samuel"];
-
-// names.push("Daniel");  // Add an element to the end of the array
-// names.unshift("Adewale"); // Add an element to the beginning of the array
-// names.pop(); // Remove the last element from the array
-// names.shift(); // Remove the first element from the array
+//     *
+//    ***
+//   *****
+//  *******
+// *********
