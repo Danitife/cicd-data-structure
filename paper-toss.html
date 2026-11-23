@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paper Toss · One Class</title>
+  <style>
+    /* These styles draw the practice area. The game logic is in the script below. */
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff8ec; color: #28271f; font: 1rem/1.55 system-ui, sans-serif; }
+    main { width: min(42rem, calc(100% - 2rem)); margin: 2rem auto; }
+    h1 { margin: 0; font-size: clamp(2.5rem, 9vw, 4rem); line-height: 1; }
+    h2 { margin-bottom: .35rem; font-size: 1.35rem; }
+    .label { margin-bottom: .35rem; color: #4b6549; font-size: .8rem; font-weight: 750; text-transform: uppercase; letter-spacing: .1em; }
+    #yard {
+      position: relative;
+      height: clamp(12rem, 42vh, 19rem);
+      overflow: hidden;
+      border: 2px solid #6c805a;
+      border-radius: 16px;
+      background: repeating-linear-gradient(90deg, #e7efd7 0 1px, transparent 1px 10%) #f5f8e9;
+    }
+    /* The bin spans 62%–78% of the yard; the shot lands at the same height. */
+    .bin { position: absolute; left: 62%; top: 14%; width: 16%; height: 18%; display: grid; place-items: center; background: #356352; color: white; border-radius: 6px 6px 12px 12px; font-weight: 750; }
+    #aim-guide, .ball { position: absolute; transform: translate(-50%, -50%); }
+    #aim-guide { top: 83%; left: 35%; color: #356352; font-size: 1.65rem; line-height: 1; }
+    .ball { top: 83%; width: 19px; height: 19px; background: #fff; border: 2px solid #796341; border-radius: 47% 53% 59% 41%; box-shadow: inset -4px -3px #e3d5ba; }
+    .controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 1rem; margin-top: .75rem; }
+    label { display: block; font-weight: 700; }
+    input { display: block; width: 100%; margin: .4rem 0; accent-color: #356352; }
+    button { min-height: 44px; padding: .45rem 1rem; border: 0; border-radius: 8px; background: #356352; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    button:hover { background: #24483c; }
+    :focus-visible { outline: 3px solid #875c24; outline-offset: 3px; }
+    #result { min-height: 1.55em; }
+    ol { padding-left: 1.45rem; }
+    li + li { margin-top: .55rem; }
+    code { color: #264e40; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="label">JavaScript OOP · One class</p>
+    <h1>Paper Toss</h1>
+    <p>Picture a crumpled note and a wastebasket. Slide the arrow under the bin, then toss. You can try as many times as you like.</p>
+
+    <div id="yard" aria-hidden="true">
+      <div class="bin">Bin</div>
+      <div id="aim-guide">↑</div>
+    </div>
+    <div class="controls">
+      <label for="aim">Aim across the yard
+        <input id="aim" type="range" min="5" max="95" value="35" aria-describedby="aim-hint">
+      </label>
+      <button id="shoot" type="button">Toss paper</button>
+    </div>
+    <p id="aim-hint" hidden>The bin is between 62 and 78 on the aim slider.</p>
+    <p id="result" role="status">Move the slider to aim.</p>
+
+    <h2>What happens when you click Toss?</h2>
+    <ol>
+      <li><strong>Make a ball.</strong> A class is a recipe. <code>new PaperBall(position)</code> follows that recipe to make one ball. The <code>constructor</code> creates its circle on the page. <code>this</code> means that particular ball.</li>
+      <li><strong>Send it flying.</strong> <code>ball.fly()</code> asks that ball to move. The browser animates its <code>top</code> position from 83% to 23%. Smaller numbers are higher on the screen, so it moves up.</li>
+      <li><strong>Check where it landed.</strong> When the animation ends, check whether the ball is lined up with the bin, report the result, and remove the ball. The next click creates a new one.</li>
+    </ol>
+    <p>Try it: Open this file in your editor and change <code>650</code> to <code>1500</code>. Save and reload to see the paper fly more slowly.</p>
+  </main>
+
+  <script>
+    const yard = document.querySelector('#yard'); // The area that holds the bin and the paper balls.
+    const aim = document.querySelector('#aim'); // The slider gives us a horizontal position from 5 to 95.
+    const guide = document.querySelector('#aim-guide'); // The arrow shows where a new ball will start.
+    const result = document.querySelector('#result'); // This is where we tell the player what happened.
+
+    class PaperBall {
+      constructor(position) { // JavaScript runs this when we write new PaperBall(...).
+        this.position = position; // Remember where THIS ball was aimed, even if the slider moves later.
+        this.circle = document.createElement('span'); // Create an HTML element for this particular piece of paper.
+        this.circle.className = 'ball'; // Apply the CSS that makes the element look like crumpled paper.
+        this.circle.style.left = `${position}%`; // Place it that far across the yard.
+        yard.append(this.circle); // Put the new circle on the page so the player can see it.
+      }
+
+      fly() { // The ball moves when someone calls this method.
+        const flight = this.circle.animate([{ top: '83%' }, { top: '23%' }], 650); // Move upward over 650 milliseconds.
+        flight.onfinish = () => { // Wait until the ball reaches the bin's height before checking the aim.
+          const inBin = this.position >= 62 && this.position <= 78; // Is the center of the ball between the bin's edges?
+          result.textContent = inBin ? 'In the bin!' : 'Miss! Adjust your aim and toss again.'; // Pick a message based on the landing spot.
+          this.circle.remove(); // Take only this ball off the page when its flight ends.
+        };
+      }
+    }
+
+    aim.addEventListener('input', () => { // Move the guide whenever the player adjusts the slider.
+      guide.style.left = `${aim.value}%`; // Give the guide the same horizontal position as the next ball.
+    });
+
+    document.querySelector('#shoot').addEventListener('click', () => { // Run these two steps every time the button is pressed.
+      const ball = new PaperBall(Number(aim.value)); // 1. Turn the slider's text into a number and make a ball there.
+      ball.fly(); // 2. Tell that ball to move. It won't move just because we created it.
+    });
+  </script>
+</body>
+</html>

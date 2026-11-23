@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c1120">
+  <title>Pulse Patrol · Learn JavaScript OOP</title>
+  <style>
+    /* The palette is shared by the playfield, controls, and lessons. */
+    :root {
+      color-scheme: dark;
+      --ink: #eef3ff;
+      --muted: #a7b3cc;
+      --dim: #8493b1;
+      --mint: #70f3c4;
+      --gold: #ffcb88;
+      --surface: #131b30;
+      --edge: #2c3856;
+      --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 12% 0%, #182343 0, transparent 32rem), #0c1120;
+      color: var(--ink);
+      font: 1rem/1.55 system-ui, sans-serif;
+    }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; cursor: pointer; }
+    a { color: var(--mint); text-underline-offset: .22em; }
+    :focus-visible { outline: 2px solid var(--mint); outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .wrap { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .masthead { border-bottom: 1px solid var(--edge); }
+    .masthead .wrap { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 750; }
+    .brand-mark {
+      display: grid; place-items: center; width: 32px; height: 32px;
+      border: 1px solid #3d776b; border-radius: 9px; background: #173639; color: var(--mint);
+    }
+    .masthead a { font-size: .88rem; }
+    .intro { padding-block: 35px 24px; }
+    .eyebrow { margin: 0; color: var(--mint); font: 700 .72rem/1.45 var(--mono); letter-spacing: .13em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin: 5px 0 7px; font-size: clamp(2.5rem, 6vw, 4.55rem); line-height: 1; letter-spacing: -.065em; }
+    h2 { margin: 4px 0 8px; font-size: clamp(1.55rem, 4vw, 2.15rem); line-height: 1.15; letter-spacing: -.035em; }
+    .intro p:last-child, .lesson-intro { margin-bottom: 0; color: var(--muted); }
+    .arcade { display: grid; grid-template-columns: minmax(0, 2.7fr) minmax(230px, 1fr); gap: 18px; align-items: start; }
+    .panel { border: 1px solid var(--edge); border-radius: 16px; background: var(--surface); overflow: hidden; }
+    .panel-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 12px 16px; border-bottom: 1px solid var(--edge);
+      color: var(--dim); font: 700 .70rem/1.4 var(--mono); text-transform: uppercase; letter-spacing: .09em;
+    }
+    #mode-label { display: flex; align-items: center; gap: 7px; color: var(--mint); }
+    #mode-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .screen { position: relative; background: #090f20; }
+    canvas { display: block; width: 100%; height: auto; }
+    canvas:focus-visible { outline-offset: -3px; }
+    .cover {
+      position: absolute; inset: 0; display: grid; place-items: center; padding: 12px;
+      background: radial-gradient(ellipse at center, #090f20 10%, #090f20d9 39%, #090f2033 76%);
+      text-align: center;
+    }
+    .cover h2 { margin-top: 7px; font-size: clamp(1.35rem, 4vw, 2.75rem); }
+    .cover p:not(.eyebrow) { color: var(--muted); font-size: .88rem; margin-bottom: 16px; }
+    .actions { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    .button {
+      padding: 8px 14px; border: 1px solid #4a5c7e; border-radius: 8px; background: #17223b;
+      color: var(--ink); font-size: .84rem; font-weight: 700; min-height: 40px;
+    }
+    .button:hover { background: #243452; }
+    .button.primary { background: var(--mint); border-color: var(--mint); color: #0d2926; }
+    .button.primary:hover { background: #a0f7da; }
+    .deck { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-top: 1px solid var(--edge); }
+    .deck .button { min-height: 42px; touch-action: none; user-select: none; }
+    .deck .button:active { background: #354666; }
+    .deck #end-run { margin-left: auto; }
+    .sidebar { display: grid; gap: 12px; }
+    .telemetry { display: grid; grid-template-columns: 1fr 1fr; margin: 0; padding: 13px 16px 16px; }
+    .telemetry div + div { padding-left: 15px; border-left: 1px solid var(--edge); }
+    .telemetry dt { color: var(--muted); font-size: .78rem; }
+    .telemetry dd { margin: 3px 0 0; color: var(--mint); font: 700 1.55rem/1.2 var(--mono); }
+    .telemetry div:last-child dd { color: var(--gold); }
+    .panel-body { padding: 12px 16px 15px; }
+    .panel-body p { margin: 0; color: var(--muted); font-size: .87rem; }
+    .panel-body p + p { margin-top: 9px; }
+    kbd, .chip { display: inline-block; padding: 1px 6px; border: 1px solid #475774; border-radius: 5px; color: var(--ink); font: .76rem/1.5 var(--mono); }
+    .chip { color: var(--mint); }
+    .lessons { max-width: 860px; padding-block: 34px 60px; }
+    .lesson-intro { max-width: 65ch; margin-bottom: 16px; }
+    details { margin-top: 8px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); }
+    summary { padding: 12px 15px; cursor: pointer; font-weight: 700; }
+    .lesson-body { padding: 0 15px 15px; color: var(--muted); }
+    .lesson-body p:last-child { margin-bottom: 0; }
+    code { font-family: var(--mono); color: var(--mint); }
+    pre { margin: 0; padding: 12px; background: #0b1122; border: 1px solid var(--edge); border-radius: 8px; overflow: auto; font-size: .79rem; }
+    pre code { color: var(--ink); }
+    @media (max-width: 760px) {
+      .wrap { width: calc(100% - 28px); }
+      .arcade { grid-template-columns: minmax(0, 1fr); }
+      .sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sidebar .panel:last-child { grid-column: 1 / -1; }
+    }
+    @media (max-width: 380px) {
+      .sidebar { grid-template-columns: minmax(0, 1fr); }
+      .deck { gap: 5px; padding-inline: 7px; }
+      .deck .button { padding-inline: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="wrap">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span> Arcade Lab</div>
+      <a href="#walkthrough">Code walkthrough ↓</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="intro">
+      <p class="eyebrow">JavaScript OOP · Project 01</p>
+      <h1>Pulse Patrol</h1>
+      <p>Move a ship, fire light pulses, and clear falling targets. Then see which object does what.</p>
+    </div>
+
+    <section class="arcade" aria-label="Pulse Patrol game">
+      <div class="panel">
+        <div class="panel-bar"><span>01 / The playfield</span><span id="mode-label" role="status">Ready</span></div>
+        <div class="screen">
+          <canvas id="field" width="720" height="420" tabindex="0" aria-label="Pulse Patrol playfield" aria-describedby="controls">
+            This game needs a browser with Canvas support.
+          </canvas>
+          <div class="cover" id="cover">
+            <div>
+              <p class="eyebrow" id="cover-kicker">Practice arena</p>
+              <h2 id="cover-title">Ready to patrol?</h2>
+              <p id="cover-text">Take the controls or watch the ship play itself.</p>
+              <div class="actions">
+                <button class="button primary" id="play" type="button">Play game</button>
+                <button class="button" id="demo" type="button">Watch demo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="deck" id="deck" hidden aria-label="On-screen game controls">
+          <button class="button" data-action="left" type="button" aria-label="Move left">← Left</button>
+          <button class="button" data-action="right" type="button" aria-label="Move right">Right →</button>
+          <button class="button" data-action="fire" type="button">Fire</button>
+          <button class="button" id="end-run" type="button">End run</button>
+        </div>
+        <noscript><p class="panel-body">Enable JavaScript to play the game and view the source walkthrough.</p></noscript>
+      </div>
+
+      <aside class="sidebar" aria-label="Game information">
+        <div class="panel">
+          <div class="panel-bar">Flight data</div>
+          <dl class="telemetry">
+            <div><dt>Score</dt><dd id="score">0000</dd></div>
+            <div><dt>Lives</dt><dd id="lives">3 / 3</dd></div>
+          </dl>
+        </div>
+        <div class="panel" id="controls">
+          <div class="panel-bar">Controls</div>
+          <div class="panel-body">
+            <p><kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd> to move</p>
+            <p><kbd>Space</kbd> to fire. Hold to repeat.</p>
+            <p>You can also hold the on-screen buttons.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-bar">Objective</div>
+          <div class="panel-body">
+            <p><span class="chip">+100</span> for each target cleared. Lose one life if a target crosses the bottom line.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="lessons" id="walkthrough" aria-labelledby="walkthrough-title">
+      <p class="eyebrow">From objects to a working game</p>
+      <h2 id="walkthrough-title">Build it step by step</h2>
+      <p class="lesson-intro">New to classes? Start with <a href="oop.js">the OOP primer</a> (run <code>node oop.js</code> to try the examples). Then expand each step in order. The listings are pulled from the actual script this game runs; the comments explain what each line does and why it is there.</p>
+
+      <details open>
+        <summary>00 · Give the game a place to draw</summary>
+        <div class="lesson-body">
+          <p>HTML defines the canvas, buttons, and scoreboard. The canvas is a blank drawing surface; CSS makes it fit the page without changing the 720 × 420 coordinate system the game uses. <code>tabindex="0"</code> lets keyboard players focus the playfield. Coordinates start at the top-left: x increases to the right and y increases down.</p>
+          <pre><code>&lt;canvas id="field" width="720" height="420" tabindex="0"&gt;
+  This game needs a browser with Canvas support.
+&lt;/canvas&gt;</code></pre>
+        </div>
+      </details>
+      <details>
+        <summary>01 · Connect JavaScript to the page</summary>
+        <div class="lesson-body"><p>Find the HTML elements by ID and ask the canvas for a 2D drawing context. The game reuses these references rather than searching the page every frame.</p><pre tabindex="0"><code data-source="1"></code></pre></div>
+      </details>
+      <details>
+        <summary>02 · Define a shared Sprite class</summary>
+        <div class="lesson-body"><p>Every game object has a position and size. Put that shared state and rectangle-overlap rule in one class. In <code>this.x</code>, <code>this</code> is whichever object the method was called on.</p><pre tabindex="0"><code data-source="2"></code></pre></div>
+      </details>
+      <details>
+        <summary>03 · Create a Ship, a Pulse, and a Target</summary>
+        <div class="lesson-body"><p>Each is a kind of sprite, so they inherit position, size, and collision logic. Each defines its own <code>draw()</code>. Calling the same method on different objects and getting different behavior is polymorphism.</p><pre tabindex="0"><code data-source="3"></code></pre></div>
+      </details>
+      <details>
+        <summary>04 · Compose the objects into a Game</summary>
+        <div class="lesson-body"><p>A game <em>has</em> a ship, pulses, and targets; it isn't a kind of sprite. The game coordinates those objects, while private methods keep its rules out of the page's button handlers. A frame is one update followed by one drawing pass.</p><pre tabindex="0"><code data-source="4"></code></pre></div>
+      </details>
+      <details>
+        <summary>05 · Hook up keyboard, touch, and demo mode</summary>
+        <div class="lesson-body"><p>Event listeners record what you're holding. The game loop reads that state to determine movement and firing. In demo mode, the game supplies those inputs itself.</p><pre tabindex="0"><code data-source="5"></code></pre></div>
+      </details>
+      <details>
+        <summary>06 · Try changing the rules</summary>
+        <div class="lesson-body"><p>Change <code>MAX_LIVES</code> from <code>3</code> to <code>5</code>, or set <code>this.speed</code> in <code>Ship</code> to <code>240</code>. Save and reload the page. Which change belongs to the game, and which belongs to the ship?</p></div>
+      </details>
+    </section>
+  </main>
+
+  <script id="game-source">
+    // STEP 1: Connect to HTML and name the shared settings.
+    const byId = id => document.getElementById(id); // Give the repeated DOM lookup a short, readable name.
+    const ui = { // Group the page elements so game state and UI references stay separate.
+      canvas: byId('field'), // The canvas is where sprites appear.
+      cover: byId('cover'), // The overlay shows the start or end screen.
+      kicker: byId('cover-kicker'), // The small label distinguishes the screen states.
+      title: byId('cover-title'), // The main label describes the current screen.
+      message: byId('cover-text'), // Show instructions or the final score here.
+      play: byId('play'), // This button starts manual play.
+      demo: byId('demo'), // This button starts the visual demonstration.
+      deck: byId('deck'), // This row provides on-screen controls during a run.
+      end: byId('end-run'), // This button returns to the menu.
+      mode: byId('mode-label'), // Report the current game mode to the player.
+      score: byId('score'), // Write the latest score here.
+      lives: byId('lives'), // Write the remaining lives here.
+    };
+    const pen = ui.canvas.getContext('2d'); // Get the tool used to draw shapes onto the canvas.
+    const WIDTH = ui.canvas.width; // Use the drawing width, not the visible CSS width.
+    const HEIGHT = ui.canvas.height; // Use the drawing height so coordinates work at any screen size.
+    const FLOOR = HEIGHT - 18; // Put the miss line slightly above the lower edge so it stays visible.
+    const MAX_LIVES = 3; // Keep the starting life count in one place so it is easy to change.
+    const LANES = [360, 190, 530, 280, 440, 120, 600]; // Cycle through predictable positions for repeatable runs.
+
+    // STEP 2: Give all sprites coordinates and a shared overlap check.
+    class Sprite { // A class is a reusable definition for creating objects.
+      constructor(x, y, width, height) { // `new` calls this method to set up one sprite.
+        this.x = x; // Store the left edge on this instance.
+        this.y = y; // Store the top edge on this instance.
+        this.width = width; // Store the width for drawing and collision checks.
+        this.height = height; // Store the height for drawing and collision checks.
+      }
+
+      overlaps(other) { // Use rectangles for simple, predictable collision detection.
+        return this.x < other.x + other.width // My left edge must be left of the other right edge.
+          && this.x + this.width > other.x // My right edge must be right of the other left edge.
+          && this.y < other.y + other.height // My top edge must be above the other bottom edge.
+          && this.y + this.height > other.y; // My bottom edge must be below the other top edge.
+      }
+    }
+
+    // STEP 3: Give each kind of sprite its own movement and shape.
+    class Ship extends Sprite { // A ship is a sprite, so it inherits the shared properties and method.
+      constructor() { // The ship always starts near the middle of the lower edge.
+        super(WIDTH / 2 - 19, FLOOR - 40, 38, 29); // Ask Sprite to set its starting position and size.
+        this.speed = 350; // Measure speed in pixels per second, independently of refresh rate.
+      }
+
+      move(direction, seconds) { // Direction is -1 for left, 0 for still, or 1 for right.
+        const nextX = this.x + direction * this.speed * seconds; // Distance equals speed times elapsed time.
+        this.x = Math.max(0, Math.min(WIDTH - this.width, nextX)); // Keep the entire ship inside the field.
+      }
+
+      fire() { // Let the ship decide where the pulse appears; the game decides when it may fire.
+        return new Pulse(this.x + this.width / 2, this.y); // Start at the center of the ship's nose.
+      }
+
+      draw(context) { // Accept a drawing tool rather than storing it on each ship.
+        context.fillStyle = '#70f3c4'; // Give the player a distinct bright mint color.
+        context.beginPath(); // Start a fresh outline so previous shapes are not included.
+        context.moveTo(this.x + this.width / 2, this.y); // Put the nose at the top center.
+        context.lineTo(this.x + this.width, this.y + this.height); // Draw down to the right wing.
+        context.lineTo(this.x + this.width / 2, this.y + this.height - 7); // Notch the tail in the middle.
+        context.lineTo(this.x, this.y + this.height); // Draw across to the left wing.
+        context.closePath(); // Join the left wing back to the nose.
+        context.fill(); // Fill the outline to make the silhouette easy to see.
+      }
+    }
+
+    class Pulse extends Sprite { // A pulse shares Sprite's rectangle-overlap method.
+      constructor(center, nose) { // The caller passes the nose position, not a top-left corner.
+        super(center - 2, nose - 14, 4, 14); // Give the pulse a thin rectangle centered above the ship.
+      }
+
+      update(seconds) { // Move the pulse a little every frame.
+        this.y -= 570 * seconds; // Subtract from y because smaller y values are higher on the canvas.
+      }
+
+      draw(context) { // Unlike the ship, the pulse draws a plain rectangle.
+        context.fillStyle = '#b5ffeb'; // Use a lighter mint so the pulse stands out from the ship.
+        context.fillRect(this.x, this.y, this.width, this.height); // Draw its current rectangle.
+      }
+    }
+
+    class Target extends Sprite { // Targets use the same position and size properties but have their own behavior.
+      constructor(center, y) { // Pass y explicitly so we can show targets in the starting preview as well.
+        super(center - 16, y, 32, 26); // Center the target in its lane and set its dimensions.
+      }
+
+      update(seconds) { // Move the target a little every frame.
+        this.y += 95 * seconds; // Add to y because larger y values are lower on the canvas.
+      }
+
+      draw(context) { // Draw an orange frame to distinguish targets from pulses and the ship.
+        context.lineWidth = 2; // Make the outline visible even when CSS shrinks the canvas.
+        context.strokeStyle = '#ffb974'; // Use a warm color to separate targets from mint sprites.
+        context.strokeRect(this.x + 1, this.y + 1, this.width - 2, this.height - 2); // Keep the border within its box.
+        context.fillStyle = '#ffb974'; // Match the outline when drawing the center detail.
+        context.fillRect(this.x + 12, this.y + 10, 8, 6); // Add a bright center so targets are easy to track.
+      }
+    }
+
+    // STEP 4: Put the objects together, update the rules, and draw each frame.
+    class Game { // Game owns other objects rather than inheriting from them: this is composition.
+      #ship; // Private fields marked with # are for this class alone.
+      #pulses; // Store active pulses together so they can be updated and removed as a group.
+      #targets; // Store active targets so one loop can handle all of them.
+      #score; // Keep the real score in the game, not in the HTML label.
+      #lives; // Keep the life count alongside the rules that change it.
+      #spawnIn; // Count down to the next target so spawning is based on time, not frames.
+      #fireIn; // Count down between shots to set a consistent firing rate.
+      #lane; // Track where we are in the lane pattern.
+      #lastTime; // Remember the last animation timestamp to calculate elapsed time.
+      #frameId = null; // Keep the scheduled callback ID so we can cancel a run.
+      #mode = 'ready'; // Decide whether to read the player or the demo pilot.
+
+      constructor(readInput) { // Accept a function to read controls so the game doesn't depend on keyboard events.
+        this.readInput = readInput; // Save that function for use each frame.
+        this.#reset(); // Create game objects and give the scoreboard its starting values.
+        this.#drawPreview(); // Show a sample scene before the player starts.
+      }
+
+      #reset() { // Both play and demo begin with clean state.
+        this.#ship = new Ship(); // A fresh ship starts at the center.
+        this.#pulses = []; // Discard pulses from the previous run.
+        this.#targets = []; // Discard targets from the previous run.
+        this.#score = 0; // Start the player at zero points.
+        this.#lives = MAX_LIVES; // Restore every life at the start of a run.
+        this.#spawnIn = 0.55; // Give the player a moment before the first target enters.
+        this.#fireIn = 0; // Allow the first shot as soon as Fire is held.
+        this.#lane = 0; // Start each run at the first lane.
+        this.#lastTime = null; // Prevent a gap between runs from counting as movement time.
+        this.#syncHud(); // Make the on-screen numbers match the new state.
+      }
+
+      start(mode) { // The page calls this public method for play or demo.
+        this.#cancelFrame(); // Guarantee there is only one animation loop.
+        this.#reset(); // Restart all counters and objects instead of reusing old state.
+        this.#mode = mode; // Use this flag to decide where the controls come from.
+        ui.mode.textContent = mode === 'demo' ? 'Demo running' : 'Playing'; // Identify who's in control.
+        ui.cover.hidden = true; // Uncover the playfield now that the game has started.
+        ui.deck.hidden = false; // Show the on-screen controls and End Run button.
+        ui.canvas.focus({ preventScroll: true }); // Route keyboard input to the game without jumping the page.
+        this.#frameId = requestAnimationFrame(this.#tick); // Ask the browser for the first animation frame.
+      }
+
+      stop(finished = false) { // End either when the player clicks End Run or when lives reach zero.
+        this.#cancelFrame(); // Stop scheduled movement and drawing.
+        this.#mode = 'ready'; // Return to the mode where no input can move the ship.
+        ui.mode.textContent = finished ? 'Game over' : 'Ready'; // Report what happened in the status label.
+        ui.kicker.textContent = finished ? 'Run complete' : 'Practice arena'; // Match the menu label to the outcome.
+        ui.title.textContent = finished ? 'Out of lives' : 'Ready to patrol?'; // Explain why the menu is visible.
+        ui.message.textContent = finished ? `Final score: ${this.#score}` : 'Take the controls or watch the ship play itself.'; // Show a result or an invitation.
+        ui.play.textContent = finished ? 'Play again' : 'Play game'; // Make it clear that you can start a new run.
+        ui.cover.hidden = false; // Bring back both start buttons.
+        ui.deck.hidden = true; // Hide actions that are useful only during play.
+        this.#drawPreview(); // Put a sample scene behind the menu instead of freezing in a messy frame.
+        ui.play.focus({ preventScroll: true }); // Put keyboard focus on a visible action again.
+      }
+
+      #cancelFrame() { // Share animation cleanup between starting and stopping.
+        if (this.#frameId !== null) cancelAnimationFrame(this.#frameId); // Cancel only if a callback has been scheduled.
+        this.#frameId = null; // Record that there is no pending frame anymore.
+      }
+
+      #tick = time => { // An arrow function keeps `this` pointing to the game when the browser calls it.
+        const seconds = this.#lastTime === null ? 0 : Math.min((time - this.#lastTime) / 1000, 0.04); // Convert milliseconds to seconds and limit jumps after a pause.
+        this.#lastTime = time; // Keep this timestamp for the next frame.
+        this.#update(seconds); // Advance movement, spawning, and scoring before drawing.
+        if (this.#lives === 0) { // Check for an end condition after applying the current frame's rules.
+          this.stop(true); // Show the final score and stop the animation.
+          return; // Exit now instead of drawing and scheduling another frame.
+        }
+        this.#draw(this.#pulses, this.#targets); // Draw the new positions so the player sees the effect of this update.
+        this.#frameId = requestAnimationFrame(this.#tick); // Repeat on the next browser frame.
+      };
+
+      #update(seconds) { // Update the world without drawing it.
+        this.#spawnIn -= seconds; // Move the target countdown toward zero as time passes.
+        if (this.#spawnIn <= 0) { // Spawn only when the wait is over.
+          const center = LANES[this.#lane % LANES.length]; // The remainder makes the lane pattern wrap back to the start.
+          this.#targets.push(new Target(center, -26)); // Create one target just above the visible field.
+          this.#lane += 1; // Use the next lane when the timer expires again.
+          this.#spawnIn += 0.92; // Wait before the next target so they don't arrive all at once.
+        }
+
+        const input = this.#mode === 'demo' ? this.#demoInput() : this.readInput(); // Choose a pilot without changing the movement rules.
+        this.#ship.move(input.direction, seconds); // Let the ship enforce its own movement and boundary rules.
+        this.#fireIn -= seconds; // Reduce the time still left before another shot is allowed.
+        if (input.fire && this.#fireIn <= 0) { // Fire only while requested and when the cooldown is ready.
+          this.#pulses.push(this.#ship.fire()); // Add the new pulse so later frames can move and draw it.
+          this.#fireIn = 0.19; // Set a short wait to avoid firing once per animation frame.
+        }
+
+        for (const pulse of this.#pulses) pulse.update(seconds); // Advance each pulse using the same elapsed time.
+        for (const target of this.#targets) target.update(seconds); // Targets move independently of the ship and pulses.
+        this.#pulses = this.#pulses.filter(pulse => pulse.y + pulse.height > 0); // Drop pulses once their bottom edge leaves the top.
+        this.#resolveTargets(); // Award points for hits, then count any targets that got past the player.
+      }
+
+      #demoInput() { // Return the same control shape as the keyboard and touchscreen reader.
+        const lowest = this.#targets[0]; // Targets enter in order and fall at equal speed, so the oldest is lowest.
+        const aimX = lowest ? lowest.x + lowest.width / 2 : WIDTH / 2; // Aim at the lowest target or return to center.
+        const delta = aimX - (this.#ship.x + this.#ship.width / 2); // Positive means the target is to the right.
+        const aligned = Math.abs(delta) < 12; // Allow a small margin so the demo ship doesn't jitter around the center.
+        return { direction: aligned ? 0 : Math.sign(delta), fire: Boolean(lowest) && aligned }; // Move toward the target; fire when lined up.
+      }
+
+      #resolveTargets() { // Remove a hit pulse immediately so it can't score on two targets.
+        this.#targets = this.#targets.filter(target => { // Keep only targets that survive and haven't crossed the line.
+          const hitIndex = this.#pulses.findIndex(pulse => pulse.overlaps(target)); // Ask each pulse to check its shared Sprite rule.
+          if (hitIndex !== -1) { // findIndex returns -1 if none of the pulses hit.
+            this.#pulses.splice(hitIndex, 1); // Consume the pulse as soon as it hits.
+            this.#score += 100; // Award points exactly once for this target.
+            this.#syncHud(); // Show the result immediately.
+            return false; // Remove the hit target from the list.
+          }
+          if (target.y + target.height >= FLOOR) { // The bottom edge reached or passed the miss line.
+            this.#lives = Math.max(0, this.#lives - 1); // Count the miss but never show a negative life count.
+            this.#syncHud(); // Refresh the life counter when it changes.
+            return false; // Remove the target so it can't cost another life next frame.
+          }
+          return true; // Keep any target that is still in play.
+        });
+      }
+
+      #syncHud() { // Update the HTML labels only when state changes.
+        ui.score.textContent = String(this.#score).padStart(4, '0'); // Use leading zeros for a scoreboard look without changing the number.
+        ui.lives.textContent = `${this.#lives} / ${MAX_LIVES}`; // Show both the remaining lives and the starting count.
+      }
+
+      #drawPreview() { // Paint example positions behind the menu without changing the real game arrays.
+        this.#draw([new Pulse(360, 314)], [new Target(165, 54), new Target(360, 97), new Target(555, 53)]); // Use real sprite objects for the still scene.
+      }
+
+      #draw(pulses, targets) { // Paint from back to front so sprites stay on top of the field.
+        pen.fillStyle = '#090f20'; // Choose a dark background for contrast.
+        pen.fillRect(0, 0, WIDTH, HEIGHT); // Paint the whole surface to erase the previous frame.
+        pen.fillStyle = '#293955'; // Pick a quieter color for the field's dot grid.
+        for (let row = 21; row < FLOOR; row += 30) { // Space grid rows out vertically.
+          for (let column = 20; column < WIDTH; column += 30) { // Repeat each row horizontally.
+            pen.fillRect(column, row, 2, 2); // Draw one small dot, not a competing foreground object.
+          }
+        }
+        pen.fillStyle = '#7a5261'; // Mark the miss line with a different color from the background grid.
+        for (let column = 0; column < WIDTH; column += 18) pen.fillRect(column, FLOOR, 10, 2); // Draw short segments to make the boundary dashed.
+        for (const target of targets) target.draw(pen); // Let each target decide what it should look like.
+        for (const pulse of pulses) pulse.draw(pen); // Call the same method name but get a different shape.
+        this.#ship.draw(pen); // Draw the player last so it remains visible if a target overlaps it.
+      }
+    }
+
+    // STEP 5: Translate browser events into actions that Game understands.
+    const keys = new Set(); // A set tracks held keys without duplicates from keyboard repeat.
+    const pointers = new Map(); // A map lets a touch player hold Fire and a direction at once.
+    const keyActions = new Map([ // Translate physical key codes into control names.
+      ['ArrowLeft', 'left'], ['KeyA', 'left'], // Two keys can represent the same left action.
+      ['ArrowRight', 'right'], ['KeyD', 'right'], // Give right movement a matching alternative.
+      ['Space', 'fire'], // Space is the only keyboard firing action.
+    ]);
+
+    function readInput() { // Convert held keyboard and pointer actions into one result.
+      const held = new Set(pointers.values()); // Start with actions from the on-screen buttons.
+      for (const key of keys) held.add(keyActions.get(key)); // Combine these with keyboard actions.
+      return { direction: Number(held.has('right')) - Number(held.has('left')), fire: held.has('fire') }; // Opposite directions cancel; fire is a boolean.
+    }
+
+    function clearInput() { // Prevent movement from getting stuck after focus changes.
+      keys.clear(); // Forget any keyboard releases we might have missed.
+      pointers.clear(); // Forget any active touches or mouse presses as well.
+    }
+
+    if (pen) { // Only create a game when the browser can draw on the canvas.
+      const game = new Game(readInput); // Give the game a function to call whenever it needs manual input.
+      ui.canvas.addEventListener('keydown', event => { // Capture keys only while the playfield has focus.
+        if (!keyActions.has(event.code) || !ui.cover.hidden) return; // Ignore unrelated keys and keys used outside a run.
+        event.preventDefault(); // Prevent arrows and Space from scrolling the page while playing.
+        keys.add(event.code); // Record the key so every frame can see it until release.
+      });
+      window.addEventListener('keyup', event => keys.delete(event.code)); // Clear released keys even if focus just moved away.
+      ui.canvas.addEventListener('blur', () => keys.clear()); // Stop keyboard movement when focus leaves the field.
+      window.addEventListener('blur', clearInput); // Reset both keyboard and pointer state when leaving the window.
+
+      for (const button of ui.deck.querySelectorAll('[data-action]')) { // Attach the same behavior to Left, Right, and Fire.
+        button.addEventListener('pointerdown', event => { // Pointer events cover mouse, touch, and pen.
+          if (event.button !== 0) return; // Ignore secondary mouse buttons so they don't trigger the game.
+          event.preventDefault(); // Keep the canvas focused while using the on-screen buttons.
+          button.setPointerCapture(event.pointerId); // Keep receiving release events if the finger slides off the button.
+          pointers.set(event.pointerId, button.dataset.action); // Remember which action this pointer is holding.
+        });
+        for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) { // Handle both normal and interrupted presses.
+          button.addEventListener(type, event => pointers.delete(event.pointerId)); // Drop only this pointer's action, leaving other touches alone.
+        }
+      }
+
+      ui.play.addEventListener('click', () => { // Connect the manual start button.
+        clearInput(); // Start without keys or touches left over from another run.
+        game.start('play'); // Switch to the player-controlled input path.
+      });
+      ui.demo.addEventListener('click', () => { // Connect the Watch Demo button.
+        clearInput(); // Discard any earlier player input.
+        game.start('demo'); // Start the same game with the automatic pilot.
+      });
+      ui.end.addEventListener('click', () => { // Let the player return to the menu at any time.
+        clearInput(); // Clear controls before leaving the run.
+        game.stop(); // Stop the loop and restore the start buttons.
+      });
+    } else { // Explain what happened instead of offering controls that can't work.
+      ui.message.textContent = 'This browser could not create a 2D canvas.'; // Give the player a concrete reason.
+      ui.play.disabled = true; // Disable Play because nothing can be drawn.
+      ui.demo.disabled = true; // Disable Demo because it uses the same playfield.
+    }
+  </script>
+  <script>
+    // Reuse the running source rather than maintaining a second, possibly out-of-date copy.
+    const source = document.getElementById('game-source').textContent; // Read the inline script as plain text.
+    const sections = source.split(/^[ \t]*\/\/ STEP (\d+):[^\n]*$/m); // Split at the numbered step markers.
+    for (let index = 1; index < sections.length; index += 2) { // The split contains alternating step numbers and code.
+      const listing = document.querySelector(`[data-source="${sections[index]}"]`); // Find the matching code panel.
+      if (listing) listing.textContent = sections[index + 1].trimEnd().replace(/^\n|^    /gm, ''); // Show literal code and remove the common indentation.
+    }
+  </script>
+</body>
+</html>

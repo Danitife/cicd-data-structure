@@ -30,11 +30,12 @@ console.log("madam")
 
 function maxNum(arr){
     let max = arr[0];
-    for(let i = 1; i < arr.length; i++){
-        if(arr[i] > max){
-            max = arr[i];
-        }
-        return max;
-    }
+    // for(let i = 1; i < arr.length; i++){
+    //     if(arr[i] > max){
+    //         max = arr[i];
+    //     }
+    //     return max;
+    // }
+    maxNum()
 }
 // [1, 4, 6, 8, 2, 3, 5, 7, 9, 12] let max = arr[0];
